@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Powered Personal Finance Tracker</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<div class="container">
+  <h1>💰 AI Powered Personal Finance Tracker</h1>
+
+  <div class="card">
+    <input type="number" id="income" placeholder="Monthly Income">
+    <input type="number" id="food" placeholder="Food Expense">
+    <input type="number" id="travel" placeholder="Travel Expense">
+    <input type="number" id="shopping" placeholder="Shopping Expense">
+    <input type="number" id="entertainment" placeholder="Entertainment Expense">
+    <button onclick="analyzeBudget()">Analyze Budget</button>
+  </div>
+
+  <div class="stats">
+    <div class="box"><h3 id="totalIncome">₹0</h3><p>Income</p></div>
+    <div class="box"><h3 id="totalExpense">₹0</h3><p>Expense</p></div>
+    <div class="box"><h3 id="savings">₹0</h3><p>Savings</p></div>
+  </div>
+
+  <div class="card">
+    <h2>AI Suggestion</h2>
+    <p id="result">Enter your details and click Analyze.</p>
+  </div>
+
+  <div class="card">
+    <canvas id="expenseChart"></canvas>
+  </div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>
