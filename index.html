@@ -1,43 +1,279 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI Powered Personal Finance Tracker</title>
-<link rel="stylesheet" href="style.css">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FinSmart AI — Student Finance Tracker</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body>
-<div class="container">
-  <h1>💰 AI Powered Personal Finance Tracker</h1>
-
-  <div class="card">
-    <input type="number" id="income" placeholder="Monthly Income">
-    <input type="number" id="food" placeholder="Food Expense">
-    <input type="number" id="travel" placeholder="Travel Expense">
-    <input type="number" id="shopping" placeholder="Shopping Expense">
-    <input type="number" id="entertainment" placeholder="Entertainment Expense">
-    <button onclick="analyzeBudget()">Analyze Budget</button>
-  </div>
-
-  <div class="stats">
-    <div class="box"><h3 id="totalIncome">₹0</h3><p>Income</p></div>
-    <div class="box"><h3 id="totalExpense">₹0</h3><p>Expense</p></div>
-    <div class="box"><h3 id="savings">₹0</h3><p>Savings</p></div>
-  </div>
-
-  <div class="card">
-    <h2>AI Suggestion</h2>
-    <p id="result">Enter your details and click Analyze.</p>
-  </div>
-
-  <div class="card">
-    <canvas id="expenseChart"></canvas>
-    <button onclick="getAISuggestion()">
-    🤖 Get AI Budget Advice
-</button>
+ 
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" class="login-screen">
+  <div class="login-card">
+    <div class="login-logo">💰 FinSmart <span>AI</span></div>
+    <p class="login-sub">AI-Powered Personal Finance Tracker<br>for Smart Student Budgeting</p>
+    <div class="form-group">
+      <label>Name</label>
+      <input type="text" id="loginName" placeholder="e.g. Shahanaaz" />
+    </div>
+    <div class="form-group">
+      <label>Monthly Budget (₹)</label>
+      <input type="number" id="loginBudget" placeholder="e.g. 8000" value="8000" />
+    </div>
+    <button class="btn-primary" onclick="startApp()">Get Started →</button>
+    <p class="login-note">No account needed. All data stays on your device.</p>
   </div>
 </div>
-<script src="script.js"></script>
+ 
+<!-- MAIN APP -->
+<div id="mainApp" class="app hidden">
+ 
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo">💰 FinSmart <span>AI</span></div>
+    <nav>
+      <div class="nav-item active" data-page="dashboard" onclick="showPage('dashboard', this)">
+        <span class="nav-icon">📊</span> Dashboard
+      </div>
+      <div class="nav-item" data-page="expenses" onclick="showPage('expenses', this)">
+        <span class="nav-icon">📋</span> Expenses
+      </div>
+      <div class="nav-item" data-page="budget" onclick="showPage('budget', this)">
+        <span class="nav-icon">🎯</span> Budget Planner
+      </div>
+      <div class="nav-item" data-page="ai" onclick="showPage('ai', this)">
+        <span class="nav-icon">🤖</span> AI Advisor
+      </div>
+      <div class="nav-item" data-page="github" onclick="showPage('github', this)">
+        <span class="nav-icon">🐙</span> GitHub Setup
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-chip" id="userChip">👤 Student</div>
+      <button class="btn-logout" onclick="logout()">Logout</button>
+    </div>
+  </aside>
+ 
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+ 
+    <!-- DASHBOARD PAGE -->
+    <section class="page active" id="page-dashboard">
+      <div class="page-header">
+        <h1 id="dashGreeting">Good morning! 👋</h1>
+        <span class="date-badge" id="todayDate"></span>
+      </div>
+ 
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-label">Monthly Budget</div>
+          <div class="metric-value neutral" id="metricBudget">₹8,000</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Total Spent</div>
+          <div class="metric-value danger" id="metricSpent">₹0</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Remaining</div>
+          <div class="metric-value success" id="metricRemaining">₹8,000</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Savings Rate</div>
+          <div class="metric-value warning" id="metricSavings">100%</div>
+        </div>
+      </div>
+ 
+      <div class="charts-grid">
+        <div class="card">
+          <div class="card-title">Spending by Category</div>
+          <div class="chart-legend" id="pieLegend"></div>
+          <div class="chart-wrap"><canvas id="pieChart" role="img" aria-label="Doughnut chart of spending by category"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Weekly Spending Trend</div>
+          <div class="chart-wrap"><canvas id="lineChart" role="img" aria-label="Line chart of weekly spending"></canvas></div>
+        </div>
+      </div>
+ 
+      <div class="card">
+        <div class="card-title">Budget Utilisation</div>
+        <div id="budgetBars"></div>
+      </div>
+ 
+      <div class="card">
+        <div class="card-title">Recent Transactions</div>
+        <div id="recentTransactions"></div>
+      </div>
+    </section>
+ 
+    <!-- EXPENSES PAGE -->
+    <section class="page" id="page-expenses">
+      <div class="page-header"><h1>Log Expenses</h1></div>
+ 
+      <div class="card">
+        <div class="card-title">Add New Expense</div>
+        <div class="expense-form">
+          <div class="form-group">
+            <label>Description</label>
+            <input type="text" id="expName" placeholder="e.g. Canteen lunch" />
+          </div>
+          <div class="form-group">
+            <label>Amount (₹)</label>
+            <input type="number" id="expAmount" placeholder="e.g. 120" />
+          </div>
+          <div class="form-group">
+            <label>Category</label>
+            <select id="expCat">
+              <option>Food</option>
+              <option>Transport</option>
+              <option>Study</option>
+              <option>Entertainment</option>
+              <option>Health</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Date</label>
+            <input type="date" id="expDate" />
+          </div>
+        </div>
+        <button class="btn-primary" onclick="addExpense()">+ Add Expense</button>
+        <div class="feedback" id="expFeedback"></div>
+      </div>
+ 
+      <div class="card">
+        <div class="card-title">
+          All Expenses
+          <button class="btn-export" onclick="exportCSV()">⬇ Export CSV</button>
+        </div>
+        <div class="filter-row">
+          <select id="filterCat" onchange="renderExpenseTable()">
+            <option value="">All Categories</option>
+            <option>Food</option><option>Transport</option><option>Study</option>
+            <option>Entertainment</option><option>Health</option><option>Other</option>
+          </select>
+          <input type="month" id="filterMonth" onchange="renderExpenseTable()" />
+        </div>
+        <table class="expense-table">
+          <thead><tr><th>Date</th><th>Description</th><th>Category</th><th>Amount</th><th></th></tr></thead>
+          <tbody id="expenseTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+ 
+    <!-- BUDGET PAGE -->
+    <section class="page" id="page-budget">
+      <div class="page-header"><h1>Budget Planner</h1></div>
+ 
+      <div class="card">
+        <div class="card-title">Set Category Budgets</div>
+        <div id="budgetSliders"></div>
+        <button class="btn-primary" onclick="saveBudgets()">Save Budgets</button>
+        <div class="feedback" id="budgetFeedback"></div>
+      </div>
+ 
+      <div class="card">
+        <div class="card-title">Savings Goal</div>
+        <div class="savings-form">
+          <div class="form-group">
+            <label>Goal Name</label>
+            <input type="text" id="goalName" placeholder="e.g. New Laptop" />
+          </div>
+          <div class="form-group">
+            <label>Target Amount (₹)</label>
+            <input type="number" id="goalTarget" placeholder="e.g. 50000" />
+          </div>
+          <div class="form-group">
+            <label>Saved So Far (₹)</label>
+            <input type="number" id="goalSaved" placeholder="e.g. 18200" />
+          </div>
+        </div>
+        <button class="btn-primary" onclick="updateGoal()">Update Goal</button>
+        <div id="goalDisplay" class="goal-display"></div>
+      </div>
+    </section>
+ 
+    <!-- AI ADVISOR PAGE -->
+    <section class="page" id="page-ai">
+      <div class="page-header"><h1>AI Financial Advisor 🤖</h1></div>
+ 
+      <div class="card ai-card">
+        <div class="card-title">Chat with your personal finance AI</div>
+        <div class="quick-prompts">
+          <span class="prompt-chip" onclick="quickAsk('How can I reduce my food expenses?')">🍜 Reduce food costs</span>
+          <span class="prompt-chip" onclick="quickAsk('Where am I overspending this month?')">📉 Find overspending</span>
+          <span class="prompt-chip" onclick="quickAsk('How much should I save each month?')">💰 Savings tips</span>
+          <span class="prompt-chip" onclick="quickAsk('Give me a weekly budget breakdown for a student.')">📅 Weekly breakdown</span>
+        </div>
+        <div class="chat-box" id="chatBox">
+          <div class="msg ai">
+            Hi! I'm your AI finance advisor powered by Navigate Labs. 💡<br><br>
+            Ask me anything about your student budget — how to save more, which categories to cut, 
+            investment tips, or how to plan for next semester!
+          </div>
+        </div>
+        <div class="chat-input-row">
+          <input type="text" id="chatInput" placeholder="Ask me anything about your finances..." 
+            onkeydown="if(event.key==='Enter') sendChat()" />
+          <button class="btn-send" onclick="sendChat()">Send ↗</button>
+        </div>
+      </div>
+    </section>
+ 
+    <!-- GITHUB PAGE -->
+    <section class="page" id="page-github">
+      <div class="page-header"><h1>GitHub Setup Guide 🐙</h1></div>
+ 
+      <div class="card">
+        <div class="card-title">Push this project to GitHub from VS Code</div>
+        <div class="steps-list" id="githubSteps"></div>
+      </div>
+ 
+      <div class="card">
+        <div class="card-title">Recommended Folder Structure</div>
+        <pre class="folder-tree">ai-finance-tracker/
+├── index.html          ← main app (entry point)
+├── style.css           ← all styles
+├── app.js              ← core logic (expenses, budget, charts)
+├── ai.js               ← Navigate Labs AI API calls
+├── data/
+│   └── sample-data.json   ← default sample expenses
+├── README.md           ← project description + screenshot
+└── .gitignore          ← exclude node_modules, .env, etc.</pre>
+      </div>
+ 
+      <div class="card">
+        <div class="card-title">README.md Template</div>
+        <pre class="folder-tree"># 💰 FinSmart AI — Student Finance Tracker
+ 
+An AI-powered personal finance tracker built for smart student budgeting.
+Built as a capstone project for Navigate Labs AI.
+ 
+## Features
+- 📊 Dashboard with spending charts
+- 📋 Expense logging with category tags
+- 🎯 Budget planner with sliders
+- 🤖 AI Advisor (Navigate Labs API)
+- 🐙 GitHub-integrated workflow
+ 
+## Tech Stack
+HTML · CSS · JavaScript · Chart.js · Navigate Labs AI API
+ 
+## Setup
+1. Clone: `git clone https://github.com/YOUR_USERNAME/ai-finance-tracker.git`
+2. Open `index.html` in browser — no build step needed!
+ 
+## Live Demo
+[https://YOUR_USERNAME.github.io/ai-finance-tracker]()</pre>
+      </div>
+    </section>
+ 
+  </main>
+</div>
+ 
+<script src="app.js"></script>
+<script src="ai.js"></script>
 </body>
 </html>
